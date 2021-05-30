@@ -7,8 +7,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
+from v1.users.models import User, Wallet
+
 from .models import ChainScanTracker, TransactionHistory
-from v1.users.models import User
+from .serializers import WithdrawTNBCSerializer
+
 
 PV_IP = "54.219.183.128"
 BANK_IP = "54.177.121.3"
@@ -42,3 +45,18 @@ class ChainScan(APIView):
         scan_tracker.updated_at = timezone.now()
         scan_tracker.save()
         return Response(status=status.HTTP_201_CREATED)
+
+
+class WithdrawTNBC(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        serializer = WithdrawTNBCSerializer(data=request.data)
+
+        if serializer.is_valid():
+            if not Wallet.objects.filter(owner=request.user, account_number=serializer.data['account_number']).exists():
+                error = {'error': 'Account number not associated with the user'}
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
