@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from .models import ChainScanTracker
+from .models import ChainScanTracker, TransactionHistory
 from v1.users.models import User
 
 PV_IP = "54.219.183.128"
@@ -30,13 +30,15 @@ class ChainScan(APIView):
             for transaction in r['results']:
                 transaction_time = timezone.make_aware(datetime.strptime(transaction['block']['modified_date'], '%Y-%m-%dT%H:%M:%S.%fZ'))
                 if scan_tracker.updated_at < transaction_time:
+                    amount = int(transaction['amount'])
                     user_memo = User.objects.filter(memo=transaction['memo']).first()
                     if user_memo:
-                        user_memo.loaded += int(transaction['amount'])
+                        user_memo.loaded += amount
                         user_memo.save()
+                        TransactionHistory.objects.create(user=request.user, amount=amount, type=TransactionHistory.DEPOSIT, status=TransactionHistory.COMPELTED)
                 else:
                     next_url = None
                     break
-        scan_tracker.updated_at= timezone.now()
+        scan_tracker.updated_at = timezone.now()
         scan_tracker.save()
         return Response(status=status.HTTP_201_CREATED)

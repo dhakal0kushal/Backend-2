@@ -1,5 +1,6 @@
 from django.contrib import admin
-from . import models
+from .models import ChainScanTracker, TransactionHistory
 
 # Register your models here.
-admin.site.register(models.ChainScanTracker)
+admin.site.register(ChainScanTracker)
+admin.site.register(TransactionHistory)
