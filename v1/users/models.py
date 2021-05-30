@@ -49,7 +49,7 @@ class Wallet(CreatedModified):
 # generate a random memo and check if its already taken.
 # If taken, generate another memo again until we find a valid memo
 def generate_memo(instance):
-    memo = f'tnbcrow-{uuid4()}'
+    memo = f'tnbCrow{uuid4().hex}'
     while True:
         if not User.objects.filter(memo=memo).exists():
             return memo
