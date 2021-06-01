@@ -19,13 +19,14 @@ class WalletCreateSerializer(serializers.ModelSerializer):
             instance.is_primary = True
             instance.save()
         return instance
-    
+
     def validate(self, attrs):
         if not len(attrs['account_number']) == 64:
             error = {'error': 'Invalid account number!'}
             raise serializers.ValidationError(error)
         return super().validate(attrs)
- 
+
+
 class WalletUpdateSerializer(WalletCreateSerializer):
 
     class Meta:
@@ -48,7 +49,7 @@ class WalletUpdateSerializer(WalletCreateSerializer):
                 raise serializers.ValidationError(error)
         instance = super(WalletUpdateSerializer, self).update(instance, validated_data)
         return instance
-    
+
     def validate(self, attrs):
         if not len(attrs['account_number']) == 64:
             error = {'error': 'Invalid account number!'}
