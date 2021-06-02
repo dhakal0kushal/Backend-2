@@ -20,6 +20,7 @@ BANK_IP = "54.177.121.3"
 ESCROW_WALLET = "0000000000000000000000000000000000000000000000000000000000000000"
 TRANSACTION_URL = f"http://{BANK_IP}/bank_transactions?account_number=&block__sender=&fee=&recipient={ESCROW_WALLET}"
 signing_key = nacl.signing.SigningKey(str.encode(os.environ.get('TNBCROW_SIGNING_KEY')), encoder=nacl.encoding.HexEncoder)
+payment_account_number = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder).decode('utf-8')
 
 
 class ChainScan(APIView):
@@ -59,10 +60,10 @@ class WithdrawTNBC(APIView):
 
         if serializer.is_valid():
 
-            account_number = serializer.data['account_number']
+            recipient_account_number = serializer.data['account_number']
             amount = int(serializer.data['amount'])
 
-            if not Wallet.objects.filter(owner=request.user, account_number=account_number).exists():
+            if not Wallet.objects.filter(owner=request.user, account_number=recipient_account_number).exists():
                 error = {'error': 'Account number not associated with the user'}
                 return Response(error, status=status.HTTP_400_BAD_REQUEST)
             elif amount < 3:
@@ -74,8 +75,8 @@ class WithdrawTNBC(APIView):
 
             bank_config = requests.get(f'http://{BANK_IP}/config?format=json').json()
 
-            balance_lock = requests.get(f"{bank_config['primary_validator']['protocol']}://{bank_config['primary_validator']['ip_address']}:{bank_config['primary_validator']['port'] or 0}/accounts/{account_number}/balance_lock?format=json").json()['balance_lock']
-
+            balance_lock = requests.get(f"{bank_config['primary_validator']['protocol']}://{bank_config['primary_validator']['ip_address']}:{bank_config['primary_validator']['port'] or 0}/accounts/{payment_account_number}/balance_lock?format=json").json()['balance_lock']
+            
             transaction_fee = int(bank_config['default_transaction_fee']) + int(bank_config['primary_validator']['default_transaction_fee'])
 
             withdrawl_amount = amount - transaction_fee
@@ -84,7 +85,7 @@ class WithdrawTNBC(APIView):
                 {
                     'amount': withdrawl_amount,
                     'memo': 'tnbCrow withdrawl',
-                    'recipient': account_number,
+                    'recipient': recipient_account_number,
                 },
                 {
                     'amount': int(bank_config['default_transaction_fee']),
@@ -110,8 +111,7 @@ class WithdrawTNBC(APIView):
             r = requests.request("POST", f'http://{BANK_IP}/blocks', headers=headers, data=data)
 
             if r:
-                print(r.text)
-                message = {'success': f'{withdrawl_amount} TNBC withdrawn to {account_number}'}
+                message = {'success': f'{withdrawl_amount} TNBC withdrawn to {recipient_account_number}'}
                 request.user.loaded -= amount
                 request.user.save()
             else:
