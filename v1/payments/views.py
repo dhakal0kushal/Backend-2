@@ -76,7 +76,7 @@ class WithdrawTNBC(APIView):
             bank_config = requests.get(f'http://{BANK_IP}/config?format=json').json()
 
             balance_lock = requests.get(f"{bank_config['primary_validator']['protocol']}://{bank_config['primary_validator']['ip_address']}:{bank_config['primary_validator']['port'] or 0}/accounts/{payment_account_number}/balance_lock?format=json").json()['balance_lock']
-            
+
             transaction_fee = int(bank_config['default_transaction_fee']) + int(bank_config['primary_validator']['default_transaction_fee'])
 
             withdrawl_amount = amount - transaction_fee
