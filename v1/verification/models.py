@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from django.db import models
 
-from v1.users.models import User
+from v1.users.models.users import User
 from v1.constants.models import Country
 
 

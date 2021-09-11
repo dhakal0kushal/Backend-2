@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Wallet
-from .serializers import WalletCreateSerializer, WalletUpdateSerializer
+from ..models.wallets import Wallet
+from ..serializers.wallets import WalletCreateSerializer, WalletUpdateSerializer
 
 
 # Create your views here.

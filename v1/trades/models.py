@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from django.db import models
 
-from v1.users.models import User
+from v1.users.models.users import User
 from v1.constants.models import Currency, PaymentMethod
 
 

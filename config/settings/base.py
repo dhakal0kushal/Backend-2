@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'v1.thread.apps.ThreadConfig',
     'v1.trades.apps.TradesConfig',
     'v1.verification.apps.VerificationConfig',
-    'v1.payments.apps.PaymentsConfig'
+    'v1.core.apps.CoreConfig'
 ]
 
 MIDDLEWARE = [
@@ -160,6 +160,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+SIGNING_KEY = os.environ['SIGNING_KEY']
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
@@ -173,3 +174,5 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+
+BANK_IP = "54.183.16.194"

@@ -1,8 +1,7 @@
 from uuid import uuid4
 from django.db import models
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
+from v1.users.models.users import User
 
 
 class ChatThread(models.Model):
