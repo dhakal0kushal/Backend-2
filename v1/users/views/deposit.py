@@ -6,9 +6,7 @@ from rest_framework.response import Response
 from ..serializers.deposit import DepositSerializer
 
 from v1.core.models.asset import Asset
-from v1.users.utils import get_tnbc_asset, get_or_create_wallet
-
-from ..models.wallets import Wallet
+from v1.users.utils import get_or_create_wallet
 
 
 class DepositViewSet(mixins.CreateModelMixin,
@@ -27,7 +25,7 @@ class DepositViewSet(mixins.CreateModelMixin,
 
                 asset = Asset.objects.get(symbol=serializer.data['symbol'])
 
-                wallet, created = get_or_create_wallet(request.user, asset.deposit_address)
+                wallet, created = get_or_create_wallet(request.user, asset)
 
                 wallet.deposit_address = asset.deposit_address
                 wallet.save()
@@ -40,7 +38,7 @@ class DepositViewSet(mixins.CreateModelMixin,
             else:
                 error = {'error': 'No deposit address found for that particular symbol.'}
                 return Response(error, status=status.HTTP_400_BAD_REQUEST)
-            
+
             return Response(message, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

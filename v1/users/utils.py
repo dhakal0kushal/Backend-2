@@ -13,7 +13,7 @@ def validate_address(symbol, address):
 
 
 def get_tnbc_asset():
-    
+
     return Asset.objects.get(symbol="TNBC")
 
 

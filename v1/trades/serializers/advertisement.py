@@ -13,10 +13,10 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ('uuid', 'role', 'currency', 'payment_method',
+        fields = ('uuid', 'role', 'currency', 'payment_method', 'fee',
                   'rate', 'amount', 'terms_of_trade', 'min_reputation',
                   'broadcast_trade', 'payment_windows', 'is_active', 'created_at', 'updated_at')
-        read_only_fields = 'created_at', 'updated_at',
+        read_only_fields = 'created_at', 'updated_at', 'fee'
 
     @transaction.atomic
     def create(self, validated_data):
@@ -46,6 +46,10 @@ class AdvertisementSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(error)
             else:
                 validated_data['amount'] = amount
+
+        fee_percentage = TnbcrowConstant.objects.get(title="main").escrow_fee
+
+        validated_data['fee'] = amount * fee_percentage / 100
 
         instance = super(AdvertisementSerializer, self).create(validated_data)
         return instance

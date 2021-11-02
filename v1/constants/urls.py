@@ -1,9 +1,11 @@
-from . import views
 from rest_framework.routers import SimpleRouter
+
+from .views import CountryViewSet, TransactionTypeViewSet, ExchangeViewSet, CurrencyViewSet, PaymentMethodViewSet
 
 
 router = SimpleRouter(trailing_slash=False)
-router.register('countries', views.CountryViewSet)
-router.register('transaction_type', views.TransactionTypeViewSet)
-router.register('exchange', views.ExchangeViewSet)
-router.register('currency', views.CurrencyViewSet)
+router.register('countries', CountryViewSet)
+router.register('transaction-type', TransactionTypeViewSet)
+router.register('exchange', ExchangeViewSet)
+router.register('currency', CurrencyViewSet)
+router.register('payment-method', PaymentMethodViewSet)

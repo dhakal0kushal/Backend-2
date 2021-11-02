@@ -5,7 +5,8 @@ from v1.users.models.users import User
 from v1.constants.models import PaymentMethod
 
 
-class ActiveTrade(models.Model):
+class Order(models.Model):
+
     OPEN = 'OPEN'
     COMPLETED = 'COMPLETED'
     ADMIN_COMPLETED = 'ADMIN_COMPLETED'
@@ -30,14 +31,13 @@ class ActiveTrade(models.Model):
 
     amount = models.IntegerField()
     rate = models.PositiveIntegerField()
+    fee = models.IntegerField()
 
     payment_windows = models.PositiveIntegerField()
     terms_of_trade = models.TextField()
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
 
-    status = models.CharField(max_length=255, choices=STATUS, default='OPEN')  # status of trade
-    initiator_confirmed = models.BooleanField(default=False)
-    owner_confirmed = models.BooleanField(default=False)
+    status = models.CharField(max_length=255, choices=STATUS, default='OPEN')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

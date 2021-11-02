@@ -4,7 +4,7 @@ from django.db import models
 
 
 class Exchange(models.Model):
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     name = models.CharField(max_length=255, unique=True)
@@ -15,7 +15,7 @@ class Exchange(models.Model):
 
 
 class TransactionType(models.Model):
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     name = models.CharField(max_length=255, unique=True)
@@ -25,7 +25,7 @@ class TransactionType(models.Model):
 
 
 class PaymentMethod(models.Model):
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     type = models.ForeignKey(TransactionType, on_delete=models.CASCADE)
@@ -39,7 +39,7 @@ class PaymentMethod(models.Model):
 
 
 class Currency(models.Model):
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     name = models.CharField(max_length=255, unique=True)
@@ -52,7 +52,7 @@ class Currency(models.Model):
 
 
 class TnbcrowConstant(models.Model):
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     title = models.CharField(max_length=255, unique=True)
@@ -67,7 +67,7 @@ class TnbcrowConstant(models.Model):
 
 
 class Country(models.Model):
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     name = models.CharField(max_length=255, unique=True)

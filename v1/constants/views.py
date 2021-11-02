@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 
-from .models import Country, TransactionType, Exchange, Currency
-from .serializers import CountrySerializer, TransactionTypeSerializer, ExchangeSerializer, CurrencySerializer
+from .models import Country, TransactionType, Exchange, Currency, PaymentMethod
+from .serializers import CountrySerializer, TransactionTypeSerializer, ExchangeSerializer, CurrencySerializer, PaymentMethodSerializer
 
 
 class CountryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -26,3 +26,9 @@ class CurrencyViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
+
+
+class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
+
+    queryset = PaymentMethod.objects.all()
+    serializer_class = PaymentMethodSerializer

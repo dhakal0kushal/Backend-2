@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from .models.active_trade import ActiveTrade
+from .models.order import Order
 from .models.advertisement import Advertisement
 
 # Register your models here.
 admin.site.register(Advertisement)
-admin.site.register(ActiveTrade)
+admin.site.register(Order)

@@ -27,17 +27,17 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='constants.paymentmethod'),
         ),
         migrations.AddField(
-            model_name='activetrade',
+            model_name='Order',
             name='buyer',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='buyer', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='activetrade',
+            model_name='Order',
             name='payment_method',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='constants.paymentmethod'),
         ),
         migrations.AddField(
-            model_name='activetrade',
+            model_name='Order',
             name='seller',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='seller', to=settings.AUTH_USER_MODEL),
         ),

@@ -8,7 +8,6 @@ from v1.core.models.transactions import ThenewbostonTransaction
 from v1.core.models.asset import Asset
 
 from ..serializers.withdraw import WithdrawTNBCSerializer
-from ..models.withdrawal_address import WithdrawalAddress
 from ..models.transactions import UserTransaction
 from ..models.wallets import Wallet
 
@@ -29,7 +28,7 @@ class WithdrawTNBCViewSet(mixins.CreateModelMixin,
 
             if Asset.objects.filter(symbol=serializer.data['symbol']).exists():
                 asset = Asset.objects.get(symbol=serializer.data['symbol'])
-            
+
             else:
                 error = {'error': 'tnbCrow does not support withdrawal of that particular symbol.'}
                 return Response(error, status=status.HTTP_400_BAD_REQUEST)
@@ -56,14 +55,14 @@ class WithdrawTNBCViewSet(mixins.CreateModelMixin,
             if block_response:
                 if block_response.status_code == 201:
                     txs = ThenewbostonTransaction.objects.create(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
-                                                     transaction_status=ThenewbostonTransaction.IDENTIFIED,
-                                                     direction=ThenewbostonTransaction.OUTGOING,
-                                                     account_number=address,
-                                                     amount=amount,
-                                                     fee=fee,
-                                                     signature=block_response.json()['signature'],
-                                                     block=block_response.json()['id'],
-                                                     memo=wallet.memo)
+                                                                 transaction_status=ThenewbostonTransaction.IDENTIFIED,
+                                                                 direction=ThenewbostonTransaction.OUTGOING,
+                                                                 account_number=address,
+                                                                 amount=amount,
+                                                                 fee=fee,
+                                                                 signature=block_response.json()['signature'],
+                                                                 block=block_response.json()['id'],
+                                                                 memo=wallet.memo)
                     wallet.balance -= amount + fee
                     wallet.save()
                     UserTransaction.objects.create(user=request.user, amount=amount + fee, type=UserTransaction.WITHDRAW, transaction=txs)

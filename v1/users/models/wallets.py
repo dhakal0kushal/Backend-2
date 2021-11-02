@@ -13,15 +13,16 @@ class Wallet(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
 
     balance = models.BigIntegerField(default=0)
     locked = models.BigIntegerField(default=0)
-
     memo = models.CharField(max_length=255, null=True, blank=True)
 
     deposit_address = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        unique_together = ['user', 'asset']
 
     def get_available_balance(self):
         return self.balance - self.locked

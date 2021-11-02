@@ -3,30 +3,30 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.db.models import Q
 
-from ..serializers.active_trade import ActiveTradeSerializer
+from ..serializers.order import OrderSerializer
 
-from ..models.active_trade import ActiveTrade
+from ..models.order import Order
 
 from ..permissions import OrderBuyer, OrderSeller
 
 
-class ActiveTradeViewSet(
+class OrderViewSet(
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
         mixins.ListModelMixin,
         viewsets.GenericViewSet):
 
     def get_queryset(self):
-        return ActiveTrade.objects.filter(Q(initiator=self.request.user) | Q(post__owner=self.request.user))
+        return Order.objects.filter(Q(initiator=self.request.user) | Q(post__owner=self.request.user))
 
-    serializer_class = ActiveTradeSerializer
+    serializer_class = OrderSerializer
 
     def get_permissions(self):
         data = self.request.data
         if 'status' in data:
-            if data['status'] == str(ActiveTrade.SELLER_CANCELLED):
+            if data['status'] == str(Order.SELLER_CANCELLED):
                 return [OrderSeller(), ]
-            elif data['status'] == str(ActiveTrade.BUYER_CANCELLED):
+            elif data['status'] == str(Order.BUYER_CANCELLED):
                 return [OrderBuyer(), ]
         if 'initiator_confirmed' in data and 'owner_confirmed' not in data:
             return [OrderBuyer(), ]

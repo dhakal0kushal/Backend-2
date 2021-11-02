@@ -25,6 +25,7 @@ class Advertisement(models.Model):
     rate = models.PositiveIntegerField()
 
     amount = models.PositiveIntegerField()
+    fee = models.BigIntegerField()
     payment_windows = models.PositiveIntegerField()
 
     terms_of_trade = models.TextField()

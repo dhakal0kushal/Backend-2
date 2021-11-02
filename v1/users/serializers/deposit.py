@@ -1,5 +1,3 @@
-from v1.core.models.asset import Asset
-
 from rest_framework import serializers
 
 

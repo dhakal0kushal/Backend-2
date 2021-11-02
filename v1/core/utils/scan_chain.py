@@ -16,7 +16,7 @@ from v1.constants.models import TnbcrowConstant
 def check_confirmation():
 
     waiting_confirmations_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
-                                                           created_at__gt=timezone.now() - timedelta(hours=1))
+                                                                       created_at__gt=timezone.now() - timedelta(hours=1))
 
     for txs in waiting_confirmations_txs:
 
@@ -74,14 +74,14 @@ def scan_chain():
 
                 if transaction['fee'] == "":
                     ThenewbostonTransaction.objects.create(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
-                                               direction=direction,
-                                               transaction_status=ThenewbostonTransaction.NEW,
-                                               account_number=account_number,
-                                               amount=amount,
-                                               fee=transaction_fee,
-                                               block=transaction['block']['id'],
-                                               signature=transaction['block']['signature'],
-                                               memo=transaction['memo'])
+                                                           direction=direction,
+                                                           transaction_status=ThenewbostonTransaction.NEW,
+                                                           account_number=account_number,
+                                                           amount=amount,
+                                                           fee=transaction_fee,
+                                                           block=transaction['block']['id'],
+                                                           signature=transaction['block']['signature'],
+                                                           memo=transaction['memo'])
 
             else:
                 next_url = None
@@ -97,12 +97,12 @@ def match_transaction():
 
     if tnbcrow_constant.check_tnbc_confirmation:
         confirmed_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.CONFIRMED,
-                                                   transaction_status=ThenewbostonTransaction.NEW,
-                                                   direction=ThenewbostonTransaction.INCOMING)
+                                                               transaction_status=ThenewbostonTransaction.NEW,
+                                                               direction=ThenewbostonTransaction.INCOMING)
     else:
         confirmed_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
-                                                   transaction_status=ThenewbostonTransaction.NEW,
-                                                   direction=ThenewbostonTransaction.INCOMING)
+                                                               transaction_status=ThenewbostonTransaction.NEW,
+                                                               direction=ThenewbostonTransaction.INCOMING)
 
     for txs in confirmed_txs:
 
