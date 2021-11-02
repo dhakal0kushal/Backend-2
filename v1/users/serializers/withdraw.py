@@ -1,6 +1,13 @@
 from rest_framework import serializers
 
+from .withdrawal_address import WithdrawalAddress
 
-class WithdrawTNBCSerializer(serializers.Serializer):
+
+class WithdrawTNBCSerializer(serializers.ModelSerializer):
+
     amount = serializers.IntegerField()
-    account_number = serializers.CharField(max_length=64)
+    symbol = serializers.CharField(source='asset.symbol')
+
+    class Meta:
+        model = WithdrawalAddress
+        fields = ['symbol', 'address', 'amount']

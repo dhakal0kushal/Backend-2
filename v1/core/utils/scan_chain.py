@@ -5,16 +5,17 @@ from django.utils import timezone
 from django.conf import settings
 
 from ..models.scan_tracker import ScanTracker
-from ..models.transactions import Transaction
-from v1.users.models.users import User
-from v1.users.models.transactions import UserTransaction
+from ..models.transactions import ThenewbostonTransaction
+from ..models.asset import Asset
 
-TNBC_TRANSACTION_SCAN_URL = f"http://{settings.BANK_IP}/bank_transactions?account_number={settings.ACCOUNT_NUMBER}&block__sender=&fee=&recipient="
+from v1.users.models.wallets import Wallet
+from v1.users.models.transactions import UserTransaction
+from v1.constants.models import TnbcrowConstant
 
 
 def check_confirmation():
 
-    waiting_confirmations_txs = Transaction.objects.filter(confirmation_status=Transaction.WAITING_CONFIRMATION,
+    waiting_confirmations_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
                                                            created_at__gt=timezone.now() - timedelta(hours=1))
 
     for txs in waiting_confirmations_txs:
@@ -29,15 +30,17 @@ def check_confirmation():
         if 'count' in r:
             if int(r['count']) > 0:
                 txs.total_confirmations = int(r['count'])
-                txs.confirmation_status = Transaction.CONFIRMED
+                txs.confirmation_status = ThenewbostonTransaction.CONFIRMED
                 txs.save()
 
 
 def scan_chain():
 
-    scan_tracker = ScanTracker.objects.first()
+    scan_tracker, created = ScanTracker.objects.get_or_create(asset__symbol="TNBC")
 
-    next_url = TNBC_TRANSACTION_SCAN_URL
+    deposit_address = Asset.objects.get(symbol="TNBC").deposit_address
+
+    next_url = f"http://{settings.BANK_IP}/bank_transactions?account_number={deposit_address}&block__sender=&fee=&recipient="
 
     transaction_fee = 0
 
@@ -55,24 +58,24 @@ def scan_chain():
         for transaction in r['results']:
 
             transaction_time = timezone.make_aware(datetime.strptime(transaction['block']['created_date'], '%Y-%m-%dT%H:%M:%S.%fZ'))
-            transaction_exists = Transaction.objects.filter(signature=transaction['block']['signature']).exists()
+            transaction_exists = ThenewbostonTransaction.objects.filter(signature=transaction['block']['signature']).exists()
 
             if scan_tracker.last_scanned < transaction_time and not transaction_exists:
 
                 amount = int(transaction['amount'])
 
-                if transaction['recipient'] == settings.ACCOUNT_NUMBER:
-                    direction = Transaction.INCOMING
+                if transaction['recipient'] == deposit_address:
+                    direction = ThenewbostonTransaction.INCOMING
                     account_number = transaction['block']['sender']
                 else:
                     transaction_fee = settings.TNBC_TRANSACTION_FEE
-                    direction = Transaction.OUTGOING
+                    direction = ThenewbostonTransaction.OUTGOING
                     account_number = transaction['recipient']
 
                 if transaction['fee'] == "":
-                    Transaction.objects.create(confirmation_status=Transaction.WAITING_CONFIRMATION,
+                    ThenewbostonTransaction.objects.create(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
                                                direction=direction,
-                                               transaction_status=Transaction.NEW,
+                                               transaction_status=ThenewbostonTransaction.NEW,
                                                account_number=account_number,
                                                amount=amount,
                                                fee=transaction_fee,
@@ -90,19 +93,29 @@ def scan_chain():
 
 def match_transaction():
 
-    confirmed_txs = Transaction.objects.filter(confirmation_status=Transaction.WAITING_CONFIRMATION,
-                                               transaction_status=Transaction.NEW,
-                                               direction=Transaction.INCOMING)
+    tnbcrow_constant = TnbcrowConstant.objects.get(title="main")
+
+    if tnbcrow_constant.check_tnbc_confirmation:
+        confirmed_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.CONFIRMED,
+                                                   transaction_status=ThenewbostonTransaction.NEW,
+                                                   direction=ThenewbostonTransaction.INCOMING)
+    else:
+        confirmed_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
+                                                   transaction_status=ThenewbostonTransaction.NEW,
+                                                   direction=ThenewbostonTransaction.INCOMING)
 
     for txs in confirmed_txs:
 
-        if User.objects.filter(memo=txs.memo).exists():
-            user = User.objects.get(memo=txs.memo)
-            user.balance += txs.amount
-            UserTransaction.objects.create(user=user, amount=txs.amount, type=UserTransaction.DEPOSIT, transaction=txs)
-            user.save()
-            txs.transaction_status = Transaction.IDENTIFIED
+        if Wallet.objects.filter(asset__symbol="TNBC", memo=txs.memo).exists():
+
+            wallet = Wallet.objects.get(asset__symbol="TNBC", memo=txs.memo)
+            wallet.balance += txs.amount
+            wallet.save()
+
+            UserTransaction.objects.create(user=wallet.user, amount=txs.amount, type=UserTransaction.DEPOSIT, transaction=txs)
+
+            txs.transaction_status = ThenewbostonTransaction.IDENTIFIED
             txs.save()
         else:
-            txs.transaction_status = Transaction.UNIDENTIFIED
+            txs.transaction_status = ThenewbostonTransaction.UNIDENTIFIED
             txs.save()

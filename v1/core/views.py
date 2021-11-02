@@ -1,30 +1,29 @@
-from rest_framework import status
+from rest_framework import status, mixins, viewsets
 from rest_framework.response import Response
 
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
+from v1.constants.models import TnbcrowConstant
+
 from .utils.scan_chain import check_confirmation, scan_chain, match_transaction
 
 
-class ChainScan(APIView):
+class ChainScanViewSet(mixins.CreateModelMixin,
+                       viewsets.GenericViewSet):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
+    def create(self, request, format=None):
 
-        chain_scan = scan_chain()
+        tnbcrow_constant = TnbcrowConstant.objects.get(title="main")
 
-        if not chain_scan:
-            error = {'error': 'could not scan chain'}
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        scan_chain()
 
-        confirmation_check = check_confirmation()
+        if tnbcrow_constant.check_tnbc_confirmation:
 
-        if not confirmation_check:
-            error = {'error': 'could not check for confirmations'}
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            check_confirmation()
 
         match_transaction()
 
-        return Response({'success': 'Scan Completed'}, status=status.HTTP_200_OK)
+        return Response({'success': 'Scan Completed!'}, status=status.HTTP_200_OK)

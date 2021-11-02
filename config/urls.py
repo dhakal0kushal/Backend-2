@@ -7,6 +7,7 @@ from rest_framework.routers import DefaultRouter
 from v1.constants.urls import router as constants_router
 from v1.trades.urls import router as trades_router
 from v1.users.urls import router as users_router
+from v1.core.urls import router as core_router
 
 # Swagger Thing
 from rest_framework import permissions
@@ -22,9 +23,6 @@ schema_view = get_schema_view(
         title="tnbCrow API",
         default_version='v1',
         description="Open API Docs for tnbCrow",
-        terms_of_service="https://github.com/tnbCrow",
-        contact=openapi.Contact(email="tnbcrow@gmail.com"),
-        license=openapi.License(name="GNU GENERAL PUBLIC LICENSE"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
@@ -42,6 +40,7 @@ router = DefaultRouter(trailing_slash=False)
 router.registry.extend(constants_router.registry)
 router.registry.extend(users_router.registry)
 router.registry.extend(trades_router.registry)
+router.registry.extend(core_router.registry)
 urlpatterns += router.urls
 
 

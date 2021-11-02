@@ -1,11 +1,7 @@
-from django.urls import path
+from rest_framework.routers import SimpleRouter
 
-from rest_framework.urlpatterns import format_suffix_patterns
+from .views import ChainScanViewSet
 
-from .views import ChainScan
 
-urlpatterns = [
-    path('chain-scan/', ChainScan.as_view()),
-]
-
-urlpatterns = format_suffix_patterns(urlpatterns)
+router = SimpleRouter(trailing_slash=False)
+router.register('scan-tnbc-chain', ChainScanViewSet, basename='scan-tnbc-chain')

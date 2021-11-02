@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 
 
-class Transaction(models.Model):
+class ThenewbostonTransaction(models.Model):
 
     WAITING_CONFIRMATION = 'WAITING_CONFIRMATION'
     CONFIRMED = 'CONFIRMED'

@@ -1,9 +1,10 @@
-from . import views
 from rest_framework.routers import SimpleRouter
 
-from .views.wallets import WalletViewSet
+from .views.withdrawal_address import WithdrawalAddressViewSet
 from .views.withdraw import WithdrawTNBCViewSet
+from .views.deposit import DepositViewSet
 
 router = SimpleRouter(trailing_slash=False)
-router.register('withdraw-tnbc', WithdrawTNBCViewSet, basename='withdraw-tnbc')
-router.register('wallets', WalletViewSet, basename='wallet')
+router.register('withdraw', WithdrawTNBCViewSet, basename='withdraw-tnbc')
+router.register('withdrawal-address', WithdrawalAddressViewSet, basename='withdrawal-address')
+router.register('deposit', DepositViewSet, basename='deposit')

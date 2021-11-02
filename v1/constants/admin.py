@@ -1,10 +1,10 @@
 from django.contrib import admin
-from . import models
+from .models import Exchange, TransactionType, PaymentMethod, Currency, Country, TnbcrowConstant
 
 # Register your models here.
-admin.site.register(models.Exchange)
-admin.site.register(models.TransactionType)
-admin.site.register(models.Currency)
-admin.site.register(models.TransactionFee)
-admin.site.register(models.PaymentMethod)
-admin.site.register(models.Country)
+admin.site.register(Exchange)
+admin.site.register(TransactionType)
+admin.site.register(Currency)
+admin.site.register(TnbcrowConstant)
+admin.site.register(PaymentMethod)
+admin.site.register(Country)

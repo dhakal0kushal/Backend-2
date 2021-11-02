@@ -1,8 +1,8 @@
 from django.contrib import admin
-from . import models
+
+from .models.active_trade import ActiveTrade
+from .models.trade_post import Advertisement
 
 # Register your models here.
-admin.site.register(models.TradePost)
-admin.site.register(models.TradeRequest)
-admin.site.register(models.ActiveTrade)
-admin.site.register(models.CompletedTrade)
+admin.site.register(Advertisement)
+admin.site.register(ActiveTrade)

@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'v1.users.apps.UsersConfig',
     'v1.thread.apps.ThreadConfig',
     'v1.trades.apps.TradesConfig',
-    'v1.verification.apps.VerificationConfig',
     'v1.core.apps.CoreConfig'
 ]
 
@@ -175,4 +174,4 @@ SWAGGER_SETTINGS = {
     }
 }
 
-BANK_IP = "54.183.16.194"
+BANK_IP = "20.98.98.0"

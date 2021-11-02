@@ -1,7 +1,9 @@
-from . import views
 from rest_framework.routers import SimpleRouter
 
+from .views.trade_post import AdvertisementViewSet
+from .views.active_trade import ActiveTradeViewSet
+
+
 router = SimpleRouter(trailing_slash=False)
-router.register('trade-post', views.TradePostViewSet)
-router.register('trade-request', views.TradeRequestViewSet, basename='traderequest')
-router.register('active-trade', views.ActiveTradeViewSet, basename='activetrade')
+router.register('advertisement', AdvertisementViewSet)
+router.register('active-trade', ActiveTradeViewSet, basename='activetrade')

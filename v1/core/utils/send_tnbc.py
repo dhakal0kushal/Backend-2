@@ -12,9 +12,12 @@ payment_account_number = signing_key.verify_key.encode(encoder=nacl.encoding.Hex
 
 def send_tnbc(recipient, amount, memo):
 
-    bank_config = requests.get(f'http://{settings.BANK_IP}/config?format=json').json()
-
-    balance_lock = requests.get(f"{bank_config['primary_validator']['protocol']}://{bank_config['primary_validator']['ip_address']}:{bank_config['primary_validator']['port'] or 0}/accounts/{payment_account_number}/balance_lock?format=json").json()['balance_lock']
+    try:
+        bank_config = requests.get(f'http://{settings.BANK_IP}/config?format=json').json()
+        balance_lock = requests.get(f"{bank_config['primary_validator']['protocol']}://{bank_config['primary_validator']['ip_address']}:{bank_config['primary_validator']['port'] or 0}/accounts/{payment_account_number}/balance_lock?format=json").json()['balance_lock']
+    
+    except Exception as e:
+        return False, e
 
     fee = int(bank_config['default_transaction_fee']) + int(bank_config['primary_validator']['default_transaction_fee'])
 
@@ -45,7 +48,11 @@ def send_tnbc(recipient, amount, memo):
         'Content-Type': 'application/json',
     }
 
-    r = requests.request("POST", f'http://{settings.BANK_IP}/blocks', headers=headers, data=data)
+    try:
+        r = requests.request("POST", f'http://{settings.BANK_IP}/blocks', headers=headers, data=data)
+
+    except Exception as e:
+        return False, e
 
     return r, fee
 
@@ -55,10 +62,9 @@ def estimate_fee():
     try:
         bank_config = requests.get(f'http://{settings.BANK_IP}/config?format=json').json()
 
-    except requests.exceptions.RequestException:
-
-        return
+    except Exception as e:
+        return False, e
 
     fee = int(bank_config['default_transaction_fee']) + int(bank_config['primary_validator']['default_transaction_fee'])
 
-    return fee
+    return True, fee

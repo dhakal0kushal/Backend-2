@@ -46,12 +46,16 @@ class Currency(models.Model):
 
 
 # We will hold the fee in this model instead of hardcoding it.
-class TransactionFee(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    charge = models.IntegerField()
+class TnbcrowConstant(models.Model):
+    title = models.CharField(max_length=255, unique=True)
+    transaction_fee = models.IntegerField()  # 100 here = 1%
+    minimum_escrow_amount = models.IntegerField()
+    maximum_escrow_amount = models.IntegerField()
+    bank_ip = models.CharField(max_length=255)
+    check_tnbc_confirmation = models.BooleanField()
 
     def __str__(self):
-        return f'{self.name}: {self.charge}'
+        return f'Fee: {self.transaction_fee/100}; Minimum: {self.minimum_escrow_amount}; Maximum: {self.maximum_escrow_amount}'
 
 
 # This model will list all the countries in the world with the alpha and phone codes
