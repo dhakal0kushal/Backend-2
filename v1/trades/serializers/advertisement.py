@@ -4,8 +4,9 @@ from rest_framework import serializers
 
 from v1.constants.models import TnbcrowConstant
 from v1.users.models.wallets import Wallet
+from v1.core.models.asset import Asset
 
-from ..models.trade_post import Advertisement
+from ..models.advertisement import Advertisement
 
 
 class AdvertisementSerializer(serializers.ModelSerializer):
@@ -21,7 +22,9 @@ class AdvertisementSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         context = self.context['request']
 
-        wallet = Wallet.objects.get_or_create(user=context.user, asset__symbol="TNBC")
+        asset = Asset.objects.get(symbol="TNBC")
+
+        wallet, created = Wallet.objects.get_or_create(user=context.user, asset=asset)
 
         amount = int(validated_data.pop('amount'))
 
@@ -35,8 +38,9 @@ class AdvertisementSerializer(serializers.ModelSerializer):
             if context.data['role'] == Advertisement.SELLER:
                 if wallet.get_available_balance() >= amount:
                     validated_data['amount'] = amount
-                    context.user.locked += amount
-                    context.user.save()
+                    wallet.locked += amount
+                    wallet.save()
+
                 else:
                     error = {'error': f'You only have {wallet.get_available_balance()} TNBC in your account.'}
                     raise serializers.ValidationError(error)

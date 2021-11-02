@@ -5,10 +5,11 @@ from rest_framework.response import Response
 
 from v1.third_party.tnbCrow.permissions import IsOwner
 from v1.constants.models import TnbcrowConstant
+from v1.users.utils import get_tnbc_asset, get_or_create_wallet
 
-from ..models.trade_post import Advertisement
+from ..models.advertisement import Advertisement
 
-from ..serializers.trade_post import AdvertisementSerializer
+from ..serializers.advertisement import AdvertisementSerializer
 from ..serializers.amount import AmountSerializer
 
 
@@ -37,26 +38,37 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
 
         obj = self.get_object()
 
-        # self.serializer_class = AmountSerializer
         serializer = AmountSerializer(data=request.data)
 
         if serializer.is_valid():
+
             amount = int(request.data['amount'])
-            if obj.owner_role == Advertisement.SELLER:
-                if request.user.get_user_balance() > amount:
-                    request.user.locked += amount
-                    fee_percentage = TnbcrowConstant.objects.get(title="main").fee / 100
-                    transaction_fee = int(amount * fee_percentage / 100)
-                    final_amount = amount - transaction_fee
+
+            if obj.role == Advertisement.SELLER:
+
+                asset = get_tnbc_asset()
+
+                wallet, created = get_or_create_wallet(request.user, asset)
+    
+                if wallet.get_available_balance() >= amount:
+
+                    wallet.locked += amount
+                    wallet.save()
+
+                    fee_percentage = TnbcrowConstant.objects.get(title="main").escrow_fee / 100
+                    final_amount = amount * (100 - fee_percentage) / 100
+
                     obj.amount += final_amount
                     obj.save()
-                    request.user.save()
+                    
                 else:
-                    error = {'error': 'You donot have enough balance to load!!'}
+                    error = {'error': f'You only have {wallet.get_available_balance()} TNBC available.'}
                     raise serializers.ValidationError(error)
+
             else:
                 obj.amount += amount
                 obj.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -66,25 +78,37 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
 
         obj = self.get_object()
 
-        # self.serializer_class = AmountSerializer
         serializer = AmountSerializer(data=request.data)
 
         if serializer.is_valid():
+
             amount = int(request.data['amount'])
+
             if obj.amount >= amount:
-                if obj.owner_role == Advertisement.SELLER:
-                    fee_percentage = TnbcrowConstant.objects.get(title="main").fee / 100
-                    final_amount = (amount * 100) / (100 - fee_percentage)
-                    request.user.locked -= final_amount
+
+                if obj.role == Advertisement.SELLER:
+
+                    asset = get_tnbc_asset()
+                    wallet, created = get_or_create_wallet(request.user, asset)
+
+                    fee_percentage = TnbcrowConstant.objects.get(title="main").escrow_fee / 100
+                    final_amount = amount * (100 + fee_percentage) / 100
+
+                    wallet.locked -= final_amount
+                    wallet.save()
+
                     obj.amount -= amount
                     obj.save()
-                    request.user.save()
+
                 else:
                     obj.amount -= amount
                     obj.save()
+
             else:
-                error = {'error': 'Trade Post donot have enough coins to withdraw!!'}
+                error = {'error': 'Advertisement do not have enough coins to withdraw!!'}
                 raise serializers.ValidationError(error)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

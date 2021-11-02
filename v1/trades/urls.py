@@ -1,6 +1,6 @@
 from rest_framework.routers import SimpleRouter
 
-from .views.trade_post import AdvertisementViewSet
+from .views.advertisement import AdvertisementViewSet
 from .views.active_trade import ActiveTradeViewSet
 
 

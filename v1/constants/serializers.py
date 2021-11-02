@@ -14,7 +14,7 @@ class PaymentMethodSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PaymentMethod
-        fields = ('id', 'name')
+        fields = ('uuid', 'name')
 
 
 class TransactionTypeSerializer(serializers.ModelSerializer):
@@ -23,7 +23,7 @@ class TransactionTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TransactionType
-        fields = ('id', 'name', 'payment_method')
+        fields = ('uuid', 'name', 'payment_method')
 
 
 class ExchangeSerializer(serializers.ModelSerializer):

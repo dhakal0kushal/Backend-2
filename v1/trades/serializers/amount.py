@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
-from ..models.trade_post import Advertisement
+from ..models.advertisement import Advertisement
 
 
 class AmountSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Advertisement
         fields = ('amount', )

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from ..serializers.deposit import DepositSerializer
 
 from v1.core.models.asset import Asset
+from v1.users.utils import get_tnbc_asset, get_or_create_wallet
 
 from ..models.wallets import Wallet
 
@@ -26,11 +27,10 @@ class DepositViewSet(mixins.CreateModelMixin,
 
                 asset = Asset.objects.get(symbol=serializer.data['symbol'])
 
-                deposit_address = asset.deposit_address
+                wallet, created = get_or_create_wallet(request.user, asset.deposit_address)
 
-                wallet, created = Wallet.objects.get_or_create(user=request.user,
-                                                               asset=asset,
-                                                               deposit_address=deposit_address)
+                wallet.deposit_address = asset.deposit_address
+                wallet.save()
 
                 message = {
                     'address': wallet.deposit_address,
