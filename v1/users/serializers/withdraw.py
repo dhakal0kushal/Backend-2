@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .withdrawal_address import WithdrawalAddress
+from ..models.withdrawal_address import WithdrawalAddress
 
 
 class WithdrawTNBCSerializer(serializers.ModelSerializer):
