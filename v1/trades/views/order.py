@@ -12,6 +12,8 @@ from ..models.advertisement import Advertisement
 
 from ..permissions import IsOrderMaker, IsOrderTaker, OrderIsOpen
 
+from v1.users.utils import get_tnbc_asset, get_or_create_wallet
+
 
 class OrderViewSet(mixins.RetrieveModelMixin,
                    mixins.ListModelMixin,
@@ -38,4 +40,28 @@ class OrderViewSet(mixins.RetrieveModelMixin,
 
         serialized_order = OrderSerializer(obj)
 
+        return Response(serialized_order.data, status=status.HTTP_201_CREATED)
+    
+    
+    @action(methods=['post'], detail=True, permission_classes=[IsOrderMaker, OrderIsOpen])
+    def release(self, request, **kwargs):
+
+        obj = self.get_object()
+
+        obj.status = Order.COMPLETED
+        obj.save()
+
+        asset = get_tnbc_asset()
+
+        taker_wallet, created =  get_or_create_wallet(obj.taker, asset)
+        taker_wallet.balance += obj.amount
+        taker_wallet.save()
+
+        maker_wallet, created = get_or_create_wallet(obj.maker, asset)
+        maker_wallet.balance -= obj.amount + obj.fee
+        maker_wallet.locked -= obj.amount + obj.fee
+        maker_wallet.save()
+        
+        serialized_order = OrderSerializer(obj)
+        
         return Response(serialized_order.data, status=status.HTTP_201_CREATED)
