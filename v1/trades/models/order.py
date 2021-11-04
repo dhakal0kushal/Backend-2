@@ -4,6 +4,8 @@ from django.db import models
 from v1.users.models.users import User
 from v1.constants.models import PaymentMethod
 
+from .advertisement import Advertisement
+
 
 class Order(models.Model):
 
@@ -11,23 +13,24 @@ class Order(models.Model):
     COMPLETED = 'COMPLETED'
     ADMIN_COMPLETED = 'ADMIN_COMPLETED'
 
-    BUYER_CANCELLED = 'BUYER_CANCELLED'
-    SELLER_CANCELLED = 'SELLER_CANCELLED'
+    TAKER_CANCELLED = 'TAKER_CANCELLED'
+    MAKER_CANCELLED = 'MAKER_CANCELLED'
     ADMIN_CANCELLED = 'ADMIN_CANCELLED'
 
     STATUS = [
         (OPEN, 'Open'),
         (COMPLETED, 'Completed'),
         (ADMIN_COMPLETED, 'Admin Completed'),
-        (SELLER_CANCELLED, 'Seller Cancelled'),
-        (BUYER_CANCELLED, 'Buyer Cancelled'),
+        (TAKER_CANCELLED, 'Taker Cancelled'),
+        (MAKER_CANCELLED, 'Maker Cancelled'),
         (ADMIN_CANCELLED, 'Admin Cancelled')
     ]
 
     uuid = models.UUIDField(default=uuid4, editable=False, primary_key=True)
 
-    buyer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buyer")
-    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller")
+    maker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buyer")
+    taker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller")
+    advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE)
 
     amount = models.IntegerField()
     rate = models.PositiveIntegerField()
@@ -43,4 +46,4 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.post}'
+        return f'{self.amount}'

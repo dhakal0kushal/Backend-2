@@ -1,36 +1,41 @@
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from django.db.models import Q
 
 from ..serializers.order import OrderSerializer
 
 from ..models.order import Order
+from ..models.advertisement import Advertisement
 
-from ..permissions import OrderBuyer, OrderSeller
+from ..permissions import IsOrderMaker, IsOrderTaker, OrderIsOpen
 
 
-class OrderViewSet(
-        mixins.RetrieveModelMixin,
-        mixins.UpdateModelMixin,
-        mixins.ListModelMixin,
-        viewsets.GenericViewSet):
+class OrderViewSet(mixins.RetrieveModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
 
     def get_queryset(self):
-        return Order.objects.filter(Q(initiator=self.request.user) | Q(post__owner=self.request.user))
+        return Order.objects.filter(Q(taker=self.request.user) | Q(maker=self.request.user))
 
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+    
+    @action(methods=['post'], detail=True, permission_classes=[IsOrderTaker, OrderIsOpen])
+    def cancel(self, request, **kwargs):
 
-    def get_permissions(self):
-        data = self.request.data
-        if 'status' in data:
-            if data['status'] == str(Order.SELLER_CANCELLED):
-                return [OrderSeller(), ]
-            elif data['status'] == str(Order.BUYER_CANCELLED):
-                return [OrderBuyer(), ]
-        if 'initiator_confirmed' in data and 'owner_confirmed' not in data:
-            return [OrderBuyer(), ]
-        elif 'owner_confirmed' in data and 'initiator_confirmed' not in data:
-            return [OrderSeller(), ]
-        else:
-            return [IsAuthenticated(), ]
+        obj = self.get_object()
+
+        obj.status = Order.TAKER_CANCELLED
+        obj.save()
+
+        order_amount = obj.amount + obj.fee
+        obj.advertisement.amount += order_amount
+        obj.advertisement.fee = obj.fee
+        obj.advertisement.save()
+
+        serialized_order = OrderSerializer(obj)
+
+        return Response(serialized_order.data, status=status.HTTP_201_CREATED)

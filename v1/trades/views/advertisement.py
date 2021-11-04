@@ -35,7 +35,7 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    @action(methods=['post'], detail=True)
+    @action(methods=['post'], detail=True, serializer_class=AmountSerializer)
     def load(self, request, **kwargs):
 
         obj = self.get_object()
@@ -78,7 +78,7 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['post'], detail=True)
+    @action(methods=['post'], detail=True, serializer_class=AmountSerializer)
     def withdraw(self, request, **kwargs):
 
         obj = self.get_object()
@@ -107,7 +107,7 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
                 obj.save()
 
             else:
-                error = {'error': 'Advertisement do not have enough coins to withdraw!!'}
+                error = {'error': f'Advertisement only has {obj.amount} withdrawable TNBC available.'}
                 raise serializers.ValidationError(error)
 
             advertisement_serializer = AdvertisementSerializer(obj)
@@ -116,7 +116,7 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['post'], detail=True)
+    @action(methods=['post'], detail=True, serializer_class=AmountSerializer)
     def order(self, request, **kwargs):
 
         obj = self.get_object()
@@ -138,8 +138,8 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
                     obj.fee -= fee
                     obj.save()
 
-                    order = Order.objects.create(buyer=request.user,
-                                                 seller=obj.owner,
+                    order = Order.objects.create(taker=request.user,
+                                                 maker=obj.owner,
                                                  fee=fee,
                                                  amount=amount,
                                                  rate=obj.rate,
@@ -162,8 +162,8 @@ class AdvertisementViewSet(mixins.CreateModelMixin,
                     obj.fee -= fee
                     obj.save()
 
-                    order = Order.objects.create(buyer=obj.owner,
-                                                 seller=request.user,
+                    order = Order.objects.create(taker=obj.owner,
+                                                 maker=request.user,
                                                  fee=fee,
                                                  amount=amount,
                                                  rate=obj.rate,
