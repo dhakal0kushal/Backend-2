@@ -46,20 +46,18 @@ def scan_chain():
 
     next_url = f"http://{bank_ip}/bank_transactions?account_number={deposit_address}&block__sender=&fee=&recipient="
 
-    print(next_url)
-
     transaction_fee = 0
 
     while next_url:
 
         try:
-            r = requests.get(next_url).json()
+            r = requests.get(next_url)
 
         except requests.exceptions.RequestException:
 
             return False
 
-        next_url = r['next']
+        next_url = r.json()['next']
 
         for transaction in r['results']:
 
