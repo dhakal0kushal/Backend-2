@@ -44,20 +44,20 @@ def scan_chain():
 
     bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
 
-    next_url = f"http://{bank_ip}/bank_transactions?account_number={deposit_address}&block__sender=&fee=&recipient="
+    next_url = f"http://{bank_ip}/bank_transactions?account_number={deposit_address}?format=json"
 
     transaction_fee = 0
 
     while next_url:
 
         try:
-            r = requests.get(next_url)
+            r = requests.get(next_url).json()
 
         except requests.exceptions.RequestException:
 
             return False
 
-        next_url = r.json()['next']
+        next_url = r['next']
 
         for transaction in r['results']:
 
