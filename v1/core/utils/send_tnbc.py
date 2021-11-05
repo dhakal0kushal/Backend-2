@@ -6,14 +6,19 @@ import nacl.signing
 
 from .generate_block import generate_block
 
+from v1.constants.models import TnbcrowConstant
+
+
 signing_key = nacl.signing.SigningKey(str.encode(settings.SIGNING_KEY), encoder=nacl.encoding.HexEncoder)
 payment_account_number = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder).decode('utf-8')
 
 
 def send_tnbc(recipient, amount, memo):
 
+    bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
+
     try:
-        bank_config = requests.get(f'http://{settings.BANK_IP}/config?format=json').json()
+        bank_config = requests.get(f'http://{bank_ip}/config?format=json').json()
         balance_lock = requests.get(f"{bank_config['primary_validator']['protocol']}://{bank_config['primary_validator']['ip_address']}:{bank_config['primary_validator']['port'] or 0}/accounts/{payment_account_number}/balance_lock?format=json").json()['balance_lock']
 
     except Exception as e:
@@ -49,7 +54,7 @@ def send_tnbc(recipient, amount, memo):
     }
 
     try:
-        r = requests.request("POST", f'http://{settings.BANK_IP}/blocks', headers=headers, data=data)
+        r = requests.request("POST", f'http://{bank_ip}/blocks', headers=headers, data=data)
 
     except Exception as e:
         return False, e
@@ -59,8 +64,10 @@ def send_tnbc(recipient, amount, memo):
 
 def estimate_fee():
 
+    bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
+
     try:
-        bank_config = requests.get(f'http://{settings.BANK_IP}/config?format=json').json()
+        bank_config = requests.get(f'http://{bank_ip}/config?format=json').json()
 
     except Exception as e:
         return False, e

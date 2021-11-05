@@ -18,10 +18,12 @@ def check_confirmation():
     waiting_confirmations_txs = ThenewbostonTransaction.objects.filter(confirmation_status=ThenewbostonTransaction.WAITING_CONFIRMATION,
                                                                        created_at__gt=timezone.now() - timedelta(hours=1))
 
+    bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
+    
     for txs in waiting_confirmations_txs:
 
         try:
-            r = requests.get(f"http://{settings.BANK_IP}/confirmation_blocks?block={txs.block}").json()
+            r = requests.get(f"http://{bank_ip}/confirmation_blocks?block={txs.block}").json()
 
         except requests.exceptions.RequestException:
 
@@ -40,7 +42,9 @@ def scan_chain():
 
     deposit_address = Asset.objects.get(symbol="TNBC").deposit_address
 
-    next_url = f"http://{settings.BANK_IP}/bank_transactions?account_number={deposit_address}&block__sender=&fee=&recipient="
+    bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
+
+    next_url = f"http://{bank_ip}/bank_transactions?account_number={deposit_address}&block__sender=&fee=&recipient="
 
     transaction_fee = 0
 
