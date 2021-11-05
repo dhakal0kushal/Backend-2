@@ -9,11 +9,10 @@ from .generate_block import generate_block
 from v1.constants.models import TnbcrowConstant
 
 
-signing_key = nacl.signing.SigningKey(str.encode(settings.SIGNING_KEY), encoder=nacl.encoding.HexEncoder)
-payment_account_number = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder).decode('utf-8')
-
-
 def send_tnbc(recipient, amount, memo):
+
+    signing_key = nacl.signing.SigningKey(str.encode(settings.SIGNING_KEY), encoder=nacl.encoding.HexEncoder)
+    payment_account_number = signing_key.verify_key.encode(encoder=nacl.encoding.HexEncoder).decode('utf-8')
 
     bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
 
