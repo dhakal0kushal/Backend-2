@@ -19,7 +19,7 @@ def check_confirmation():
                                                                        created_at__gt=timezone.now() - timedelta(hours=1))
 
     bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
-    
+
     for txs in waiting_confirmations_txs:
 
         try:
@@ -45,6 +45,8 @@ def scan_chain():
     bank_ip = TnbcrowConstant.objects.get(title="main").bank_ip
 
     next_url = f"http://{bank_ip}/bank_transactions?account_number={deposit_address}&block__sender=&fee=&recipient="
+
+    print(next_url)
 
     transaction_fee = 0
 
